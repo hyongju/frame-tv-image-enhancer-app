@@ -1,0 +1,10 @@
+{
+  "appId": "com.hyongju.frametvapp",
+  "appName": "Frame TV Art Enhancer",
+  "webDir": "dist", 
+  "bundledWebRuntime": false,
+  "server": { 
+    "iosScheme": "capacitor", 
+    "hostname": "localhost"   
+  }
+}

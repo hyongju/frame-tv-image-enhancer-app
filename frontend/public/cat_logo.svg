@@ -1,0 +1,97 @@
+<svg width="100" height="100" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="screenDiverseGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#FFD700; stop-opacity:1" /> <!-- Gold -->
+      <stop offset="50%" style="stop-color:#FF69B4; stop-opacity:1" /> <!-- Hot Pink -->
+      <stop offset="100%" style="stop-color:#ADD8E6; stop-opacity:1" /> <!-- Light Blue -->
+    </linearGradient>
+    <filter id="aiGlow">
+      <feGaussianBlur stdDeviation="1.0" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- Background: Light, warm off-white -->
+  <rect width="100" height="100" rx="20" ry="20" fill="#FAF0E6" /> <!-- Linen -->
+
+  <!-- Frame TV Bezel: Dark Bronze/Brown -->
+  <rect x="15" y="25" width="70" height="50" rx="5" ry="5" fill="#6D4C41" /> <!-- Dark Brown -->
+
+  <!-- Frame TV Screen with diverse gradient -->
+  <rect x="20" y="30" width="60" height="40" rx="3" ry="3" fill="url(#screenDiverseGradient)" />
+
+  <!-- Pixelated Kitten with Larger Head -->
+  <!-- Pixel size (ps) is 3 units. Kitten is 7x7 pixels. -->
+  <g id="pixelKitten" transform="translate(39.5, 39.5)">
+    <!-- Kitten Colors -->
+    <!-- Main Fur (M): #808080 (Gray) -->
+    <!-- Lighter Fur/Stripes (L): #D3D3D3 (LightGray) -->
+    <!-- Eyes (E): #32CD32 (Green) -->
+    <!-- Nose (N): #FFC0CB (Pink) -->
+
+    <!-- HEAD (4 pixel rows tall) -->
+    <!-- Row 0: Ears (Y offset = 0 * ps = 0) -->
+    <rect x="0"  y="0" width="3" height="3" fill="#808080"/> <!-- M: Outer Left Ear -->
+    <rect x="3"  y="0" width="3" height="3" fill="#D3D3D3"/> <!-- L: Inner Left Ear -->
+    <!-- gap for top of head -->
+    <rect x="15" y="0" width="3" height="3" fill="#D3D3D3"/> <!-- L: Inner Right Ear -->
+    <rect x="18" y="0" width="3" height="3" fill="#808080"/> <!-- M: Outer Right Ear -->
+
+    <!-- Row 1: Forehead / Eye Top (Y offset = 1 * ps = 3) -->
+    <rect x="3"  y="3" width="3" height="3" fill="#808080"/> <!-- M -->
+    <rect x="6"  y="3" width="3" height="3" fill="#32CD32"/> <!-- E: Left Eye -->
+    <rect x="9"  y="3" width="3" height="3" fill="#D3D3D3"/> <!-- L: Forehead stripe -->
+    <rect x="12" y="3" width="3" height="3" fill="#32CD32"/> <!-- E: Right Eye -->
+    <rect x="15" y="3" width="3" height="3" fill="#808080"/> <!-- M -->
+
+    <!-- Row 2: Nose / Mid-Face (Y offset = 2 * ps = 6) -->
+    <rect x="3"  y="6" width="3" height="3" fill="#808080"/> <!-- M -->
+    <rect x="6"  y="6" width="3" height="3" fill="#D3D3D3"/> <!-- L: Cheek -->
+    <rect x="9"  y="6" width="3" height="3" fill="#FFC0CB"/> <!-- N: Nose -->
+    <rect x="12" y="6" width="3" height="3" fill="#D3D3D3"/> <!-- L: Cheek -->
+    <rect x="15" y="6" width="3" height="3" fill="#808080"/> <!-- M -->
+
+    <!-- Row 3: Chin / Mouth area (Y offset = 3 * ps = 9) -->
+    <rect x="3"  y="9" width="3" height="3" fill="#808080"/> <!-- M -->
+    <rect x="6"  y="9" width="3" height="3" fill="#D3D3D3"/> <!-- L: Chin -->
+    <rect x="9"  y="9" width="3" height="3" fill="#D3D3D3"/> <!-- L: Chin -->
+    <rect x="12" y="9" width="3" height="3" fill="#D3D3D3"/> <!-- L: Chin -->
+    <rect x="15" y="9" width="3" height="3" fill="#808080"/> <!-- M -->
+
+    <!-- BODY (3 pixel rows tall) -->
+    <!-- Row 4: Shoulders/Upper Body (Y offset = 4 * ps = 12) -->
+    <rect x="3"  y="12" width="3" height="3" fill="#808080"/> <!-- M -->
+    <rect x="6"  y="12" width="3" height="3" fill="#D3D3D3"/> <!-- L: Stripe -->
+    <rect x="9"  y="12" width="3" height="3" fill="#808080"/> <!-- M -->
+    <rect x="12" y="12" width="3" height="3" fill="#D3D3D3"/> <!-- L: Stripe -->
+    <rect x="15" y="12" width="3" height="3" fill="#808080"/> <!-- M -->
+
+    <!-- Row 5: Mid Body & Tail start (Y offset = 5 * ps = 15) -->
+    <rect x="3"  y="15" width="3" height="3" fill="#808080"/> <!-- M -->
+    <rect x="6"  y="15" width="3" height="3" fill="#808080"/> <!-- M -->
+    <rect x="9"  y="15" width="3" height="3" fill="#808080"/> <!-- M -->
+    <rect x="12" y="15" width="3" height="3" fill="#808080"/> <!-- M -->
+    <rect x="15" y="15" width="3" height="3" fill="#808080"/> <!-- M -->
+    <rect x="18" y="15" width="3" height="3" fill="#808080"/> <!-- M: Tail Segment 1 -->
+
+    <!-- Row 6: Paws/Base & Tail continues (Y offset = 6 * ps = 18) -->
+    <rect x="6"  y="18" width="3" height="3" fill="#808080"/> <!-- M: Left Paws -->
+    <rect x="9"  y="18" width="3" height="3" fill="#808080"/> <!-- M -->
+    <rect x="12" y="18" width="3" height="3" fill="#808080"/> <!-- M: Right Paws -->
+    <rect x="18" y="18" width="3" height="3" fill="#D3D3D3"/> <!-- L: Tail Segment 2 (tip) -->
+  </g>
+
+  <!-- AI Enhancement Sparkles - Adjusted to be smaller and in corners -->
+  <g id="cornerSparkles">
+    <!-- Top-left sparkle -->
+    <path d="M25 35 L26 37 L28 37.5 L26 38 L25 40 L24 38 L22 37.5 L24 37 Z" fill="#FFFACD" filter="url(#aiGlow)" transform="scale(0.8)"/>
+    <!-- Bottom-right sparkle -->
+    <path d="M75 65 L76 67 L78 67.5 L76 68 L75 70 L74 68 L72 67.5 L74 67 Z" fill="#FFFACD" filter="url(#aiGlow)" transform="scale(0.8)"/>
+    <circle cx="28" cy="68" r="1.2" fill="#FFFACD" opacity="0.7"/>
+    <circle cx="72" cy="32" r="1.2" fill="#FFFACD" opacity="0.7"/>
+  </g>
+
+</svg>

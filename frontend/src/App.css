@@ -1,0 +1,528 @@
+/* frontend/src/App.css */
+@import 'react-image-crop/dist/ReactCrop.css';
+
+/* Global Styles & Resets */
+body {
+  margin: 0;
+  font-family: "Quicksand", sans-serif; 
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: #f0e6f7; 
+  color: #3d2c50; 
+  line-height: 1.6; 
+  font-size: 15px; 
+  font-weight: 400; 
+}
+
+* {
+  box-sizing: border-box;
+}
+
+/* Main App Container */
+.App {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 100vh;
+  padding: 15px;
+}
+
+/* Content Card */
+.container {
+  background-color: #ffffff;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(61, 44, 80, 0.15); 
+  width: 100%;
+  max-width: 680px; 
+  text-align: center;
+}
+
+/* Header within the container */
+.app-header {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  margin-bottom: 20px;
+  padding-bottom: 15px;
+  border-bottom: 1px solid #d1c4e9; 
+  gap: 15px;
+}
+
+.app-header h1 {
+  margin-bottom: 0;
+  font-size: 1.9em; 
+  color: #673ab7; 
+  font-weight: 700; 
+}
+
+.auth-section {
+  display: flex;
+  flex-direction: column; 
+  align-items: center;   
+  width: 100%;
+  gap: 10px; 
+}
+.auth-section p { 
+  font-size: 0.95em; 
+  color: #5e35b1; 
+  margin-bottom: 10px;
+  font-weight: 500; 
+}
+
+
+.user-info {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 0.9em; 
+  color: #4a306d;
+}
+.user-info span { 
+    font-weight: 500; 
+}
+
+
+.user-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 1px solid #b39ddb; 
+}
+
+/* Headings */
+h2 {
+  color: #5e35b1; 
+  margin-top: 25px;
+  margin-bottom: 12px;
+  font-size: 1.5em; 
+  border-bottom: 2px solid #e1d8f0; 
+  padding-bottom: 6px;
+  font-weight: 600; 
+}
+
+h3 {
+  color: #7e57c2; 
+  margin-bottom: 8px;
+  font-size: 1.15em; 
+  font-weight: 600; 
+}
+
+h4 { 
+  color: #7e57c2; 
+  margin-bottom: 8px;
+  font-size: 1em; 
+  font-weight: 500; 
+}
+
+
+/* Sections */
+.upload-section, .result-section {
+  margin-bottom: 25px;
+}
+.upload-section p, .result-section p { 
+  font-size: 0.9em;
+  color: #4a306d;
+  margin-top: -5px;
+  margin-bottom: 15px;
+  font-weight: 400; 
+}
+.result-section p strong { 
+    font-weight: 600; 
+}
+
+
+/* File Input Styling */
+input[type="file"] {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  margin: 0 auto 15px auto;
+  padding: 10px 12px;
+  font-size: 0.9em; 
+  border: 2px dashed #7e57c2; 
+  border-radius: 8px;
+  background-color: #f3e5f5; 
+  color: #4a306d;
+  cursor: pointer;
+  font-family: "Quicksand", sans-serif; 
+  transition: background-color 0.2s ease-in-out, border-color 0.2s ease-in-out;
+}
+
+input[type="file"]::file-selector-button {
+  margin-right: 10px;
+  padding: 8px 12px;
+  font-size: 0.9em; 
+  border: none;
+  background-color: #7e57c2; 
+  color: white;
+  border-radius: 6px;
+  cursor: pointer;
+  font-family: "Quicksand", sans-serif; 
+  font-weight: 500; 
+  transition: background-color 0.2s ease-in-out;
+}
+
+input[type="file"]:hover {
+  background-color: #e1bee7; 
+  border-color: #5e35b1; 
+}
+
+input[type="file"]:hover::file-selector-button {
+  background-color: #5e35b1;
+}
+
+/* Button Styling */
+button {
+  background-color: #673ab7; 
+  color: white;
+  border: none;
+  padding: 10px 20px; 
+  font-size: 0.95em; 
+  font-weight: 600; 
+  border-radius: 8px;
+  cursor: pointer;
+  font-family: "Quicksand", sans-serif; 
+  transition: background-color 0.2s ease-in-out, transform 0.1s ease;
+  box-shadow: 0 2px 4px rgba(61, 44, 80, 0.2);
+  width: auto;
+  display: inline-block;
+  letter-spacing: 0.5px; 
+}
+
+.action-button { 
+  background-color: #512da8; 
+  color: white;
+  width: 100%; 
+  max-width: 280px; 
+}
+.action-button:hover:not(:disabled) {
+  background-color: #4527a0; 
+}
+
+.secondary-action-button {
+  background-color: #b39ddb; /* Light Purple */
+  color: #3d2c50;             /* Dark Purple Text */
+  width: 100%;              
+  max-width: 280px;         
+  font-weight: 500; /* Quicksand Medium, less emphasis than primary */
+}
+.secondary-action-button:hover:not(:disabled) {
+  background-color: #9575cd; 
+}
+
+
+/* General button hover (if not overridden by more specific class) */
+button:hover:not(:disabled) {
+  background-color: #512da8; 
+  transform: translateY(-1px);
+}
+
+button:active:not(:disabled) {
+  transform: translateY(0px);
+  box-shadow: 0 1px 2px rgba(61, 44, 80, 0.15);
+}
+
+button:disabled {
+  background-color: #d1c4e9; 
+  color: #9575cd; 
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.download-button {
+  background-color: #7e57c2; 
+  width: 100%;
+  max-width: 280px;
+  margin: 0 auto;
+}
+.download-button:hover:not(:disabled) {
+  background-color: #5e35b1; 
+}
+
+.logout-button {
+  background-color: #9575cd; 
+  padding: 7px 13px;
+  font-size: 0.85em; 
+}
+.logout-button:hover:not(:disabled) {
+  background-color: #7e57c2; 
+}
+
+/* Image Preview Area */
+.image-preview-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+  margin-top: 18px;
+  margin-bottom: 18px;
+}
+
+.image-box {
+  flex: 1 1 100%;
+  width: 100%;
+  max-width: 300px; 
+  padding: 12px;
+  border: 1px solid #d1c4e9; 
+  border-radius: 8px;
+  background-color: #faf6fc; 
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  min-height: auto;
+  box-shadow: 0 4px 8px rgba(61, 44, 80, 0.07);
+}
+
+.image-box img {
+  max-width: 100%;
+  height: auto;
+  max-height: 260px;
+  object-fit: contain;
+  border-radius: 4px;
+  margin-bottom: 8px;
+  border: 1px solid #eee;
+}
+
+/* Feedback Messages (Error) */
+.error { 
+  margin: 15px auto;
+  padding: 10px 15px;
+  border-radius: 8px;
+  font-weight: 500; 
+  max-width: 90%;
+  text-align: center;
+  font-size: 0.9em; 
+  color: #c62828; 
+  background-color: #ffcdd2;
+  border: 1px solid #ef9a9a;
+}
+
+/* Loading Indicator Styling */
+.loading-indicator {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin: 25px 0; 
+  min-height: 100px; 
+}
+
+.loading-indicator p { 
+  margin-top: 12px;
+  color: #5e35b1; 
+  font-weight: 500; 
+  font-size: 1em; 
+}
+
+
+/* Styles for Google button container */
+.auth-section > div[role="button"] { 
+  width: 100% !important;          
+  max-width: 240px !important;   
+  margin: 0 auto !important; 
+  min-height: 38px !important;   
+}
+
+/* Cropper specific containers */
+.crop-area-container {
+  margin-top: 20px;
+  margin-bottom: 20px;
+  border: 1px dashed #b39ddb; 
+  padding: 15px;
+  border-radius: 8px;
+  background-color: #fdfdff; 
+}
+
+/* Wrapper for the "Cropped Preview" and "Enhance Cropped Image" button */
+.crop-actions-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap; 
+  gap: 20px; 
+  margin-top: 20px;
+}
+
+.crop-output-preview-container { 
+  padding: 10px;
+  border: 1px solid #e1d8f0;
+  border-radius: 6px;
+  background-color: #faf6fc;
+  display: inline-block; 
+}
+
+/* h4 for "Cropped Preview" is styled by the general h4 rule */
+
+.crop-output-image { 
+  max-width: 250px; 
+  max-height: calc(250px / (16/9)); 
+  border: 1px solid #d1c4e9;
+  border-radius: 4px;
+  display: block; 
+  margin: 0 auto;
+}
+
+/* Link-like button for fallbacks */
+.link-button {
+  background: none;
+  border: none;
+  color: #673ab7; /* Your primary link color */
+  text-decoration: underline;
+  cursor: pointer;
+  padding: 0;
+  font-size: inherit; /* Inherit font size from surrounding text */
+  font-family: inherit;
+  font-weight: 500; /* Quicksand medium */
+}
+.link-button:hover {
+  color: #512da8; 
+}
+
+
+/* Disclaimer Styling */
+.disclaimer {
+  margin-top: 40px;
+  padding-top: 20px;
+  border-top: 1px solid #e1d8f0; 
+  font-size: 0.8em; 
+  color: #7e57c2;    
+  text-align: center;
+  max-width: 600px; 
+  line-height: 1.5; 
+  font-weight: 400; 
+}
+.disclaimer a {
+  color: #5e35b1; 
+  text-decoration: underline;
+  font-weight: 500; 
+}
+.disclaimer a:hover {
+  color: #4527a0; 
+}
+.disclaimer p { 
+    font-weight: 400; 
+}
+.disclaimer p strong { 
+    font-weight: 600; 
+}
+
+
+/* --- MEDIA QUERIES --- */
+@media (min-width: 576px) {
+  body {
+    font-size: 15px; 
+  }
+  .container {
+    padding: 25px 30px;
+  }
+  .app-header h1 {
+    font-size: 2em; 
+  }
+  .user-info {
+    font-size: 0.95em; 
+  }
+  .image-box {
+     max-width: 380px;
+  }
+  .action-button, .secondary-action-button {
+    max-width: 300px; /* Slightly wider buttons on this breakpoint if full width */
+  }
+  .download-button {
+      max-width: 300px;
+  }
+
+}
+
+@media (min-width: 768px) {
+  .App {
+    padding: 20px;
+  }
+  .container {
+    padding: 30px 40px;
+    max-width: 680px;
+  }
+  .app-header {
+    flex-direction: row;
+    gap: 20px;
+  }
+  .auth-section {
+    flex-direction: row; 
+    justify-content: flex-end; 
+    gap: 15px; 
+  }
+  .app-header h1 {
+    font-size: 2.2em; 
+    color: #5e35b1;
+  }
+  
+  .user-info {
+    font-size: 1em; 
+    gap: 12px;
+  }
+  .user-avatar {
+    width: 35px;
+    height: 35px;
+  }
+  h2 {
+    font-size: 1.6em; 
+  }
+  h3 {
+    font-size: 1.2em; 
+  }
+  input[type="file"] {
+    max-width: 380px;
+    padding: 12px 15px;
+    font-size: 0.95em; 
+  }
+  input[type="file"]::file-selector-button {
+    padding: 10px 15px;
+    font-size: 0.95em; 
+  }
+  button {
+    padding: 12px 25px; 
+    font-size: 1em; 
+  }
+  .action-button, .secondary-action-button, .download-button { 
+    width: auto; 
+    max-width: none;
+  }
+  .image-preview-container {
+    flex-direction: row;
+    justify-content: space-around;
+    align-items: flex-start;
+  }
+  .image-box {
+    flex: 1 1 260px;
+    width: auto;
+    max-width: none;
+    min-height: 240px;
+  }
+  .image-box img {
+    max-height: 240px;
+  }
+  .error { 
+    font-size: 0.95em; 
+  }
+  .loading-indicator p { 
+    font-size: 1.05em; 
+  }
+   .auth-section > div[role="button"] { /* Google Button */
+    width: auto !important; 
+    max-width: none !important;
+  }
+}
+
+@media (min-width: 992px) {
+  .container {
+    max-width: 760px;
+  }
+   body {
+    font-size: 16px; 
+  }
+}

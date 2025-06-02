@@ -1,0 +1,76 @@
+# No top-level 'version' key needed for Docker Compose v2 (it uses the latest Compose Spec)
+# or you can use: version: 'compose_spec' # to be explicit about using the Compose Specification
+
+services:
+  backend:
+    build: ./backend
+    ports:
+      - "8181:8000"
+    volumes:
+      - ./backend/app:/code/app:z
+      - ./backend/.env:/code/.env:z # Mount the .env file from the backend directory
+    # command: tail -f /dev/null # Keep container running
+    environment:
+      - PYTHONPATH=/code
+      - PYTHONUNBUFFERED=1
+      # DOCKER_BUILDKIT=0 # Disables BuildKit. Consider removing or setting to 1 for better build performance.
+      - NVIDIA_VISIBLE_DEVICES=all # Still useful for the container to know what's available
+      - NVIDIA_DRIVER_CAPABILITIES=all # Still useful for the container
+      - PYTORCH_CUDA_ALLOC_CONF=garbage_collection_threshold:0.6,max_split_size_mb:128
+      # GOOGLE_CLIENT_ID: Loaded from .env file mounted above
+      # SECRET_KEY: Loaded from .env file
+      # ALGORITHM: Loaded from .env file
+      # ACCESS_TOKEN_EXPIRE_MINUTES: Loaded from .env file
+    # --- GPU Configuration ---
+    # Option 1: Using the 'gpus' key (preferred for modern Docker & Compose)
+    # gpus: all # Request all available GPUs. Can also be specific: e.g., 'device=0,1' or count: 1
+    # Option 2: Using 'runtime: nvidia' (older, but still works if 'gpus' is not supported by your Docker version)
+    # runtime: nvidia
+    # The 'deploy' block for resources is primarily for Swarm and can be removed for local 'docker compose up'
+    # if using 'gpus' or 'runtime: nvidia'.
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    # deploy:
+    #     resources:
+    #       reservations:
+    #         devices:
+    #           - driver: nvidia
+    #             count: 1 # or 'all'
+    #             capabilities: [gpu]
+    #           # device_ids: ['0', '1'] # if you need specific GPUs by ID
+    container_name: image_processor_backend
+    restart: always
+    # Note on user: If you were using user: "${MY_UID}:${MY_GID}", ensure that user
+    # has permissions to access GPU devices. Often, root or a user in the 'video'
+    # or 'docker' group is needed, or specific udev rules.
+    # For GPU access, it's common to run the container process as root or ensure
+    # the non-root user has necessary device permissions.
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        # These variables are substituted by docker-compose from the .env file
+        # in the same directory as this docker-compose.yml file, or from host environment.
+        VITE_API_URL: https://api.hyongju.com
+        VITE_GOOGLE_CLIENT_ID: ${VITE_GOOGLE_CLIENT_ID_FROM_HOST_ENV}
+    ports:
+      - "3131:80"
+    depends_on:
+      - backend
+    container_name: image_processor_frontend_vite
+    restart: always
+
+# Notes on .env file handling for frontend build args:
+# For VITE_GOOGLE_CLIENT_ID: ${VITE_GOOGLE_CLIENT_ID_FROM_HOST_ENV} to work,
+# you need a .env file in the same directory as this docker-compose.yml file
+# (e.g., ./project-root/.env) containing:
+# VITE_GOOGLE_CLIENT_ID_FROM_HOST_ENV=your_google_client_id_here
+#
+# Alternatively, VITE_GOOGLE_CLIENT_ID_FROM_HOST_ENV can be set as an environment variable
+# in the shell where you run 'docker compose up'.
