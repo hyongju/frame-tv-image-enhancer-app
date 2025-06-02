@@ -245,8 +245,6 @@ To make the Docker Compose application start automatically after a server reboot
 
 ## Contributing
 
-(Add guidelines here if you plan to accept contributions: how to report bugs, suggest features, submit pull requests, coding standards, etc.)
-
 1. Fork the repository.
 2. Create your feature branch (`git checkout -b feature/AmazingFeature`).
 3. Commit your changes (`git commit -m 'Add some AmazingFeature'`).
@@ -255,7 +253,6 @@ To make the Docker Compose application start automatically after a server reboot
 
 ## License
 
-(Choose a license, e.g., MIT, Apache 2.0. If you don't have one, you can omit this or state "All Rights Reserved" for now.)
-Distributed under the MIT License. See `LICENSE` file for more information (if you add a LICENSE file).
-```
+Distributed under the MIT License. See `LICENSE` file for more information.
+
 
