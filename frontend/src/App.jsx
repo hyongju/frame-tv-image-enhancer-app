@@ -3,7 +3,7 @@ import { GoogleLogin, googleLogout } from '@react-oauth/google';
 import jwt_decode from 'jwt-decode';
 import { Oval } from 'react-loader-spinner';
 import ReactCrop, { centerCrop, makeAspectCrop } from 'react-image-crop';
-import './App.css'; // Ensure ReactCrop.css is imported here or in main.jsx
+import './App.css'; // Ensure ReactCrop.css is imported here or in main.jsx via App.css
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8181'; // Or your production URL
 
@@ -132,7 +132,7 @@ function App() {
         handleLogout();
       }
     }
-  }, []); 
+  }, []); // Run only once on mount 
 
   const handleGoogleLoginSuccess = async (credentialResponse) => { 
     const idToken = credentialResponse.credential;
@@ -146,6 +146,7 @@ function App() {
         setAppToken(data.access_token); 
         setUser(data.user); 
         setCurrentPage('upload'); 
+        setError(''); // Clear any previous login errors
     } catch (err) { 
         console.error('Backend Google login failed:', err); 
         setError(err.message); 
@@ -158,6 +159,8 @@ function App() {
       setError('Google login failed. Please try again.');
   };
 
+  // Use useCallback for handleLogout if it were passed as a prop or in a dependency array,
+  // but here it's fine as a regular const if only called directly.
   const handleLogout = () => { 
     console.log("Logging out...");
     googleLogout(); 
@@ -192,12 +195,13 @@ function App() {
     setCrop(centeredCrop); 
     setCompletedCrop(centeredCrop); 
     return false;
-  }, [aspect, originalImagePreview]); 
+  }, [aspect, originalImagePreview, setCurrentPage, setError]); // Added dependencies
 
   const handleFileChange = (event) => {
     console.log("handleFileChange triggered. Initial event.target.files:", event.target.files);
     const file = event.target.files && event.target.files[0]; 
 
+    // Clear previous processing/crop results before setting new file
     if (processedImageUrl) { URL.revokeObjectURL(processedImageUrl); setProcessedImageUrl(null); }
     if (croppedImagePreviewUrl) { URL.revokeObjectURL(croppedImagePreviewUrl); setCroppedImagePreviewUrl(null); }
     setCroppedImageBlob(null);
@@ -210,6 +214,7 @@ function App() {
     if (file) {
       console.log("File actually selected:", file.name);
       setSelectedFile(file); 
+      
       const newObjectUrl = URL.createObjectURL(file);
       console.log("Setting new originalImagePreview URL:", newObjectUrl.substring(0, 50) + "...");
       setOriginalImagePreview(newObjectUrl);
@@ -239,7 +244,7 @@ function App() {
     } catch (e) { 
         console.error("Error in generateCroppedPreview:", e); 
         setError("Crop preview failed. Please adjust crop or try a different image."); 
-        setCroppedImageBlob(null); // Clear blob if preview fails
+        setCroppedImageBlob(null); 
         setCroppedImagePreviewUrl(null);
     }
   }
@@ -255,7 +260,7 @@ function App() {
     const fName = croppedImageBlob.name || 'cropped_for_tv.png';
     formData.append('file', croppedImageBlob, fName);
     const controller = new AbortController();
-    const tId = setTimeout(() => controller.abort(), 600000);
+    const tId = setTimeout(() => controller.abort(), 600000); // 10 minutes
     try {
         const response = await fetch(`${API_BASE_URL}/process-image/`, {method: 'POST', headers: {'Authorization': `Bearer ${appToken}`}, body: formData, signal: controller.signal});
         clearTimeout(tId);
@@ -284,7 +289,7 @@ function App() {
     finally { setIsLoading(false); }
   };
 
-  const handleDownload = () => { /* ... same download logic ... */ 
+  const handleDownload = () => { 
     if (processedImageRef.current) {
       const url = URL.createObjectURL(processedImageRef.current); 
       const a = document.createElement('a'); a.href = url; a.download = downloadFileName;
@@ -294,7 +299,7 @@ function App() {
   };
 
   const renderPageContent = () => {
-    if (isLoading) { // Priority 1: Loader
+    if (isLoading) { 
       return (
         <div className="loading-indicator">
           <Oval height={50} width={50} color="#673ab7" secondaryColor="#d1c4e9" strokeWidth={4} strokeWidthSecondary={4} ariaLabel="oval-loading" wrapperStyle={{ margin: "0 auto" }} visible={true}/>
@@ -303,24 +308,23 @@ function App() {
       );
     }
 
-    if (!appToken) { // Priority 2: Login Prompt (only if not loading)
+    if (!appToken) { 
       return ( 
         <>
-          <p style={{fontSize: '0.9em', color: '#5e35b1', marginBottom: '10px', marginTop: '20px'}}>
+          <p className="auth-intro-text">
             Sign in to upscale your favorite images for your Samsung The Frame TV.
           </p>
           {error && <p className="error" style={{marginBottom: '15px'}}>Error: {error}</p>}
           <GoogleLogin
             onSuccess={handleGoogleLoginSuccess}
             onError={handleGoogleLoginError}
-            ux_mode="popup"
             theme="outline" size="large" shape="rectangular"
           />
         </>
       );
     }
     
-    if (error) { // Priority 3: General Error Display (if logged in and not loading)
+    if (error) { 
         return (
             <div>
                 <p className="error">Error: {error}</p>
@@ -329,13 +333,12 @@ function App() {
         );
     }
 
-    // Priority 4: Page content based on currentPage
     switch (currentPage) {
       case 'upload':
         return (
           <div className="upload-section">
             <h2>Step 1: Upload Your Image</h2>
-            <p style={{fontSize: '0.85em', color: '#4a306d', marginTop: '-5px', marginBottom: '15px'}}>
+            <p> 
               Choose any image you'd like to prepare for your Samsung Frame TV's Art Mode.
             </p>
             <input 
@@ -346,13 +349,11 @@ function App() {
             />
           </div>
         );
-// ... (inside App component, renderPageContent function) ...
-
       case 'crop':
         return originalImagePreview ? (
           <div className="crop-area-container">
             <h2>Step 2: Crop for 16:9 Aspect</h2>
-            <p style={{fontSize: '0.85em', color: '#4a306d', marginTop: '-5px', marginBottom: '15px'}}>Drag to select the perfect 16:9 portion of your image.</p>
+            <p>Drag to select the perfect 16:9 portion of your image.</p> 
             <ReactCrop 
               crop={crop} 
               onChange={(_, pc) => setCrop(pc)} 
@@ -369,27 +370,24 @@ function App() {
                 style={{maxHeight: '350px', maxWidth: '100%', display: 'block', margin: '0 auto', objectFit: 'contain'}}
               />
             </ReactCrop>
-
-            {/* Updated crop-actions-container to include both buttons */}
             <div className="crop-actions-container">
               {croppedImagePreviewUrl && (
-                <div className="crop-output-preview-container"> 
+                <div className="crop-output-preview-container">
                   <h4>Cropped Preview:</h4>
                   <img alt="Cropped Preview" src={croppedImagePreviewUrl} className="crop-output-image"/>
                 </div>
               )}
-              {/* Group action buttons vertically */}
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px' }}>
                 <button 
                   onClick={handleProcessCroppedImage} 
                   disabled={!croppedImageBlob || isLoading} 
-                  className="action-button" // Primary action button
+                  className="action-button"
                 >
                   Enhance Cropped Image
                 </button>
                 <button 
                   onClick={() => resetAllImageStates(true)} 
-                  className="secondary-action-button" // New class for styling
+                  className="secondary-action-button"
                 >
                   Choose Different Image
                 </button>
@@ -399,9 +397,6 @@ function App() {
         ) : (
           <p>Please <button onClick={() => resetAllImageStates(true)} className="link-button">upload an image</button> first.</p>
         );
-
-// ... (rest of renderPageContent and App component) ...
-
       case 'result':
         return processedImageUrl ? (
           <>
@@ -412,24 +407,19 @@ function App() {
               </div>
             </div>
             <div className="result-section">
-              <p style={{fontSize: '0.85em', color: '#4a306d', marginTop: '-5px', marginBottom: '15px'}}>
-                Save your upscaled image. <br/>Filename: <strong>{downloadFileName}</strong>
-              </p>
-              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px' }}> {/* ADDED WRAPPER */}
-                <button onClick={handleDownload} className="download-button">
-                  Download Enhanced Image
-                </button>
+              <p>Save your upscaled image. <br/>Filename: <strong>{downloadFileName}</strong></p> 
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px' }}>
+                <button onClick={handleDownload} className="download-button">Download Enhanced Image</button>
                 <button 
                   onClick={() => resetAllImageStates(true)} 
-                  className="secondary-action-button" // Use existing secondary style
-                  // Removed inline style, gap from parent div will handle spacing
+                  className="secondary-action-button"
                 >
                   Enhance Another Image
                 </button>
               </div>
             </div>
           </>
-        ) : ( 
+        ) : (
             <p>Processing may have failed or no image is ready. Please <button onClick={() => resetAllImageStates(true)} className="link-button">start over</button>.</p>
         );
       default:
@@ -442,6 +432,7 @@ function App() {
       <div className="container">
         <header className="app-header">
           <h1>Frame TV Image Enhancer</h1>
+          {/* User info is displayed here when logged in & not loading */}
           {appToken && user && !isLoading && ( 
             <div className="user-info">
               {user.picture && <img src={user.picture} alt={user.name || 'User'} className="user-avatar" />}
@@ -450,11 +441,14 @@ function App() {
             </div>
           )}
         </header>
-        {renderPageContent()}
+        
+        {/* This div will conditionally get the "auth-section" class for the login prompt */}
+        <div className={!appToken && !isLoading ? "auth-section" : "main-content-area"}> {/* Added a fallback class */}
+          {renderPageContent()}
+        </div>
+
         <div className="disclaimer">
-          <p>This tool uses AI to enhance image resolution based on Real-ESRGAN. Credit to original authors.</p>
-          <p>Visit: <a href="https://github.com/xinntao/Real-ESRGAN" target="_blank" rel="noopener noreferrer">Real-ESRGAN Repository</a></p>
-          <p style={{marginTop: '10px'}}>Not affiliated with Samsung. Samsung The Frame TV is a trademark of Samsung Electronics Co., Ltd.</p>
+          {/* ... disclaimer content ... */}
         </div>
       </div>
     </div>

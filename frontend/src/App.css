@@ -22,7 +22,7 @@ body {
 .App {
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: center; 
   min-height: 100vh;
   padding: 15px;
 }
@@ -35,13 +35,13 @@ body {
   box-shadow: 0 8px 24px rgba(61, 44, 80, 0.15); 
   width: 100%;
   max-width: 680px; 
-  text-align: center;
+  text-align: center; 
 }
 
 /* Header within the container */
 .app-header {
   display: flex;
-  flex-direction: column;
+  flex-direction: column; /* Mobile first: title above user info */
   justify-content: space-between;
   align-items: center;
   width: 100%;
@@ -58,43 +58,68 @@ body {
   font-weight: 700; 
 }
 
+/* This specifically styles the container FOR the login elements when not logged in */
+/* In App.jsx, this class is conditionally applied to the wrapper of renderPageContent() */
 .auth-section {
   display: flex;
   flex-direction: column; 
-  align-items: center;   
-  width: 100%;
+  align-items: center;   /* This centers flex items (p tag, GoogleLogin div) horizontally */
+  width: 100%;          
   gap: 10px; 
+  margin-top: 20px;  
+  margin-bottom: 20px;   
 }
-.auth-section p { 
-  font-size: 0.95em; 
+/* Style for intro text before sign-in button if it has this class */
+.auth-section p.auth-intro-text { 
+  font-size: 0.9em; 
   color: #5e35b1; 
-  margin-bottom: 10px;
+  margin-bottom: 0; /* gap on parent .auth-section handles spacing from button */
   font-weight: 500; 
+  text-align: center; 
+  max-width: 90%; 
+}
+
+/* Targets the div that GoogleLogin component renders within .auth-section */
+.auth-section > div[id^="credential_picker_container"],
+.auth-section > div > div[role="button"] {
+  display: flex !important; 
+  justify-content: center !important; 
+  width: auto !important;       
+  min-width: 220px !important; 
+  max-width: 280px !important; 
+  /* Centering of the block itself is handled by align-items on .auth-section parent */
 }
 
 
-.user-info {
+/* User info styling (part of .app-header) */
+.app-header .user-info { 
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  justify-content: center;
+  justify-content: center; /* Center on mobile when header is column */
   gap: 8px;
   font-size: 0.9em; 
   color: #4a306d;
 }
-.user-info span { 
+.app-header .user-info span { 
     font-weight: 500; 
 }
-
-
-.user-avatar {
+.app-header .user-avatar { 
   width: 32px;
   height: 32px;
   border-radius: 50%;
   border: 1px solid #b39ddb; 
 }
+.app-header .logout-button { 
+  background-color: #9575cd; 
+  padding: 7px 13px;
+  font-size: 0.85em; 
+}
+.app-header .logout-button:hover:not(:disabled) {
+  background-color: #7e57c2; 
+}
 
-/* Headings */
+/* General Headings */
 h2 {
   color: #5e35b1; 
   margin-top: 25px;
@@ -120,16 +145,20 @@ h4 {
 }
 
 
-/* Sections */
-.upload-section, .result-section {
+/* Sections (Upload, Result) & their paragraphs */
+.upload-section, .result-section, .crop-area-container { /* Added crop-area-container here */
   margin-bottom: 25px;
+  width: 100%; 
 }
-.upload-section p, .result-section p { 
+.upload-section p, .result-section p, .crop-area-container p { 
   font-size: 0.9em;
   color: #4a306d;
-  margin-top: -5px;
+  margin-top: -5px; 
   margin-bottom: 15px;
   font-weight: 400; 
+  max-width: 90%; 
+  margin-left: auto;
+  margin-right: auto;
 }
 .result-section p strong { 
     font-weight: 600; 
@@ -140,7 +169,7 @@ h4 {
 input[type="file"] {
   display: block;
   width: 100%;
-  max-width: 100%;
+  max-width: 100%; 
   margin: 0 auto 15px auto;
   padding: 10px 12px;
   font-size: 0.9em; 
@@ -189,11 +218,10 @@ button {
   font-family: "Quicksand", sans-serif; 
   transition: background-color 0.2s ease-in-out, transform 0.1s ease;
   box-shadow: 0 2px 4px rgba(61, 44, 80, 0.2);
-  width: auto;
+  width: auto; 
   display: inline-block;
   letter-spacing: 0.5px; 
 }
-
 .action-button { 
   background-color: #512da8; 
   color: white;
@@ -205,19 +233,17 @@ button {
 }
 
 .secondary-action-button {
-  background-color: #b39ddb; /* Light Purple */
-  color: #3d2c50;             /* Dark Purple Text */
+  background-color: #b39ddb; 
+  color: #3d2c50;             
   width: 100%;              
   max-width: 280px;         
-  font-weight: 500; /* Quicksand Medium, less emphasis than primary */
+  font-weight: 500; 
 }
 .secondary-action-button:hover:not(:disabled) {
   background-color: #9575cd; 
 }
 
-
-/* General button hover (if not overridden by more specific class) */
-button:hover:not(:disabled) {
+button:hover:not(:disabled) { /* General hover if not overridden */
   background-color: #512da8; 
   transform: translateY(-1px);
 }
@@ -238,20 +264,13 @@ button:disabled {
   background-color: #7e57c2; 
   width: 100%;
   max-width: 280px;
-  margin: 0 auto;
 }
 .download-button:hover:not(:disabled) {
   background-color: #5e35b1; 
 }
 
-.logout-button {
-  background-color: #9575cd; 
-  padding: 7px 13px;
-  font-size: 0.85em; 
-}
-.logout-button:hover:not(:disabled) {
-  background-color: #7e57c2; 
-}
+/* Logout button is styled under .app-header .logout-button */
+
 
 /* Image Preview Area */
 .image-preview-container {
@@ -320,15 +339,6 @@ button:disabled {
   font-size: 1em; 
 }
 
-
-/* Styles for Google button container */
-.auth-section > div[role="button"] { 
-  width: 100% !important;          
-  max-width: 240px !important;   
-  margin: 0 auto !important; 
-  min-height: 38px !important;   
-}
-
 /* Cropper specific containers */
 .crop-area-container {
   margin-top: 20px;
@@ -339,7 +349,6 @@ button:disabled {
   background-color: #fdfdff; 
 }
 
-/* Wrapper for the "Cropped Preview" and "Enhance Cropped Image" button */
 .crop-actions-container {
   display: flex;
   align-items: center;
@@ -348,6 +357,11 @@ button:disabled {
   gap: 20px; 
   margin-top: 20px;
 }
+/* If crop-actions-container's children are the preview and the button group div: */
+.crop-actions-container > div { /* Targets both preview container and button group div */
+    /* Add any shared styling here if needed, or flex properties for layout */
+}
+
 
 .crop-output-preview-container { 
   padding: 10px;
@@ -356,8 +370,6 @@ button:disabled {
   background-color: #faf6fc;
   display: inline-block; 
 }
-
-/* h4 for "Cropped Preview" is styled by the general h4 rule */
 
 .crop-output-image { 
   max-width: 250px; 
@@ -372,13 +384,13 @@ button:disabled {
 .link-button {
   background: none;
   border: none;
-  color: #673ab7; /* Your primary link color */
+  color: #673ab7; 
   text-decoration: underline;
   cursor: pointer;
   padding: 0;
-  font-size: inherit; /* Inherit font size from surrounding text */
+  font-size: inherit; 
   font-family: inherit;
-  font-weight: 500; /* Quicksand medium */
+  font-weight: 500; 
 }
 .link-button:hover {
   color: #512da8; 
@@ -430,13 +442,9 @@ button:disabled {
   .image-box {
      max-width: 380px;
   }
-  .action-button, .secondary-action-button {
-    max-width: 300px; /* Slightly wider buttons on this breakpoint if full width */
+  .action-button, .secondary-action-button, .download-button {
+    max-width: 300px; 
   }
-  .download-button {
-      max-width: 300px;
-  }
-
 }
 
 @media (min-width: 768px) {
@@ -448,20 +456,26 @@ button:disabled {
     max-width: 680px;
   }
   .app-header {
-    flex-direction: row;
-    gap: 20px;
+    flex-direction: row; /* Title and user info side-by-side */
+    /* justify-content: space-between; (already default for flex) */
+    /* align-items: center; (already default for flex) */
   }
-  .auth-section {
-    flex-direction: row; 
-    justify-content: flex-end; 
-    gap: 15px; 
+  
+  /* User info specific alignment when header is a row */
+  .app-header .user-info {
+    justify-content: flex-end; /* Align user info items to their end (right) */
   }
+  
+  /* auth-section (for login prompt) remains column and centered on all screen sizes */
+  /* If you want .auth-section itself to take less width on desktop, you can add a max-width here */
+  /* .auth-section { max-width: 400px; margin-left: auto; margin-right: auto; } */
+
   .app-header h1 {
     font-size: 2.2em; 
     color: #5e35b1;
   }
   
-  .user-info {
+  .user-info { /* General user-info styles (used within .app-header) */
     font-size: 1em; 
     gap: 12px;
   }
@@ -476,7 +490,7 @@ button:disabled {
     font-size: 1.2em; 
   }
   input[type="file"] {
-    max-width: 380px;
+    max-width: 380px; /* Re-apply max-width for larger screens */
     padding: 12px 15px;
     font-size: 0.95em; 
   }
@@ -490,7 +504,7 @@ button:disabled {
   }
   .action-button, .secondary-action-button, .download-button { 
     width: auto; 
-    max-width: none;
+    max-width: none; 
   }
   .image-preview-container {
     flex-direction: row;
@@ -511,10 +525,6 @@ button:disabled {
   }
   .loading-indicator p { 
     font-size: 1.05em; 
-  }
-   .auth-section > div[role="button"] { /* Google Button */
-    width: auto !important; 
-    max-width: none !important;
   }
 }
 
