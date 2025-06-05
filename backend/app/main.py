@@ -44,7 +44,7 @@ ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", 30))
 
 NETSCALE = 3 # This is the 'outscale' for RealESRGANer, not the model's native scale
 ENHANCE_TIMEOUT_SECONDS = 60
-MAX_IMAGE_PIXELS = 2_000_000 # Max pixels for image BEFORE RealESRGAN
+MAX_IMAGE_PIXELS = 930_000 # Max pixels for image BEFORE RealESRGAN
 MAX_FILE_SIZE_MB = 50
 MAX_FILE_SIZE_BYTES = MAX_FILE_SIZE_MB * 1024 * 1024
 
@@ -58,7 +58,7 @@ ASPECT_RATIO_16_9 = 16 / 9
 ASPECT_RATIO_9_16 = 9 / 16
 
 # --- RealESRGAN Tiling Configuration ---
-ESRGAN_TILE_SIZE = 200 
+ESRGAN_TILE_SIZE = 512 
 ESRGAN_TILE_PAD = 10     
 
 if not GOOGLE_CLIENT_ID:
