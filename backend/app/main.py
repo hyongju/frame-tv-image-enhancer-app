@@ -310,6 +310,40 @@ async def process_image_premium(file: UploadFile = File(...), premium_user: User
         logger.error(f"Error during premium processing: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail="Error during image enhancement.")
 
+# In backend/app/main.py
+
+@app.post("/process-image-premium-resize/", summary="Premium Tier: Fast Resize to 4K")
+async def process_image_premium_resize(
+    file: UploadFile = File(...),
+    premium_user: User = Depends(require_premium_user) # Re-use the same dependency
+):
+    """
+    Provides a fast, non-AI resize-to-4K option for premium users.
+    This is essentially the same as the free tier's logic, but restricted to premium users.
+    """
+    logger.info(f"Processing PREMIUM FAST RESIZE request for user: {premium_user.email}")
+    
+    contents = await file.read()
+    if len(contents) > MAX_FILE_SIZE_BYTES:
+        raise HTTPException(status_code=413, detail=f"File size exceeds limit of {MAX_FILE_SIZE_MB}MB.")
+
+    try:
+        # Re-use the same simple logic as the free tier
+        pil_image = Image.open(io.BytesIO(contents)).convert("RGB")
+        final_image = resize_and_crop_to_fill(pil_image, TARGET_FINAL_WIDTH, TARGET_FINAL_HEIGHT)
+        
+        img_byte_arr = io.BytesIO()
+        final_image.save(img_byte_arr, format='JPEG', quality=90)
+        img_byte_arr.seek(0)
+        
+        return StreamingResponse(img_byte_arr, media_type="image/jpeg")
+
+    except UnidentifiedImageError:
+        raise HTTPException(status_code=400, detail="Cannot identify image file.")
+    except Exception as e:
+        logger.error(f"Error during premium fast resize for {premium_user.email}: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail="An error occurred during image resizing.")
+
 # ==============================================================================
 # 6. ADMIN DASHBOARD SETUP (sqladmin)
 # ==============================================================================

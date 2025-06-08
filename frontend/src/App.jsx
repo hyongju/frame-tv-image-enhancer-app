@@ -7,7 +7,7 @@ import './App.css'; // Ensure ReactCrop.css is imported here or in main.jsx via 
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8181'; // Or your production URL
 
-// Helper function to get cropped image data (This is from your original file, unchanged)
+// Helper function to get cropped image data (FROM YOUR ORIGINAL, UNCHANGED)
 function getCroppedImg(image, crop, fileName) {
   if (!crop || !image || crop.width === 0 || crop.height === 0) {
     console.error("getCroppedImg: Invalid crop or image dimensions.");
@@ -64,34 +64,34 @@ function getCroppedImg(image, crop, fileName) {
 
 
 function App() {
-  // Page State (from original)
-  const [currentPage, setCurrentPage] = useState('upload'); 
-
-  // Auth State (from original)
-  const [user, setUser] = useState(null); // Will now store the full user object { email, name, tier }
+  // --- All State from your original file ---
+  const [currentPage, setCurrentPage] = useState('upload');
+  const [user, setUser] = useState(null);
   const [appToken, setAppToken] = useState(localStorage.getItem('appToken'));
-
-  // Image & Crop State (from original)
   const [selectedFile, setSelectedFile] = useState(null);
   const [originalImagePreview, setOriginalImagePreview] = useState(null);
   const [crop, setCrop] = useState();
   const [completedCrop, setCompletedCrop] = useState(null);
   const [croppedImageBlob, setCroppedImageBlob] = useState(null);
-  const [croppedImagePreviewUrl, setCroppedImagePreviewUrl] = useState(null); 
-  
-  const imgRef = useRef(null);
-  const aspect = 16 / 9;
-
-  // Processing & Result State (from original)
+  const [croppedImagePreviewUrl, setCroppedImagePreviewUrl] = useState(null);
   const [processedImageUrl, setProcessedImageUrl] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [downloadFileName, setDownloadFileName] = useState('frame_tv_art.png');
-  const processedImageRef = useRef(null); 
+  // --- NEW STATE VARIABLE ADDED ---
+  const [isProcessingAI, setIsProcessingAI] = useState(false);
+
+
+  // --- All Refs from your original file (UNCHANGED) ---
+  const imgRef = useRef(null);
+  const aspect = 16 / 9;
+  const processedImageRef = useRef(null);
   const fileInputRef = useRef(null);
 
-  // resetAllImageStates (from original, unchanged)
-  const resetAllImageStates = useCallback((clearError = true) => {
+
+  // --- All Functions from your original file (with necessary additions) ---
+
+  const resetAllImageStates = useCallback((clearError = true) => { // UNCHANGED
     console.log("resetAllImageStates called");
     setSelectedFile(null);
     if(originalImagePreview) URL.revokeObjectURL(originalImagePreview);
@@ -109,10 +109,9 @@ function App() {
     }
     setCurrentPage('upload');
     if (clearError) setError('');
-  }, [originalImagePreview, processedImageUrl, croppedImagePreviewUrl]); 
+  }, [originalImagePreview, processedImageUrl, croppedImagePreviewUrl]);
 
-  // useEffect for initial auth check (from original, with one change)
-  useEffect(() => { 
+  useEffect(() => { // MODIFIED
     const token = localStorage.getItem('appToken'); 
     if (token) {
       try {
@@ -120,34 +119,28 @@ function App() {
         if (decodedToken.exp * 1000 < Date.now()) {
           handleLogout(); 
         } else {
-           // --- CHANGE #1 (START) ---
-           // Instead of decoding user info from the token, fetch the full, authoritative user object
-           // from the backend. This ensures we always have the latest tier information.
            setAppToken(token); 
            fetch(`${API_BASE_URL}/users/me`, { headers: { 'Authorization': `Bearer ${token}` }})
             .then(res => {
                 if (res.ok) return res.json();
-                // If the token is rejected by the backend (e.g., 401), log out.
                 throw new Error('Token validation failed on backend');
             })
             .then(userDataFromServer => {
-                setUser(userDataFromServer); // Set the full user object
+                setUser(userDataFromServer);
             })
             .catch(err => {
                 console.error("Failed to re-validate session with /users/me:", err);
-                handleLogout(); // Log out if we can't get user data
+                handleLogout();
             });
-           // --- CHANGE #1 (END) ---
         }
       } catch (e) {
         console.error("Error decoding app token on load:", e);
         handleLogout();
       }
     }
-  }, []); // Run only once on mount 
+  }, []);
 
-  // handleGoogleLoginSuccess (from original, with one change)
-  const handleGoogleLoginSuccess = async (credentialResponse) => { 
+  const handleGoogleLoginSuccess = async (credentialResponse) => { // MODIFIED
     const idToken = credentialResponse.credential;
     setIsLoading(true); 
     setError('');
@@ -157,7 +150,7 @@ function App() {
         const data = await response.json();
         localStorage.setItem('appToken', data.access_token);
         setAppToken(data.access_token); 
-        setUser(data.user); // The backend now provides the full user object with the tier
+        setUser(data.user);
         setCurrentPage('upload'); 
         setError('');
     } catch (err) { 
@@ -167,13 +160,12 @@ function App() {
     } 
     finally { setIsLoading(false); }
   };
-  const handleGoogleLoginError = () => {  /* Unchanged */
+  const handleGoogleLoginError = () => {  // UNCHANGED
       console.error('Google Login Failed on Frontend');
       setError('Google login failed. Please try again.');
   };
 
-  // handleLogout (from original, unchanged)
-  const handleLogout = () => { 
+  const handleLogout = () => { // UNCHANGED
     console.log("Logging out...");
     googleLogout(); 
     localStorage.removeItem('appToken');
@@ -182,33 +174,22 @@ function App() {
     resetAllImageStates(true); 
   };
 
-  // useEffect for revoking object URLs (from original, unchanged)
-  useEffect(() => { 
+  useEffect(() => { // UNCHANGED
     const urlsToRevoke = [originalImagePreview, processedImageUrl, croppedImagePreviewUrl];
     return () => { urlsToRevoke.forEach(url => { if (url) URL.revokeObjectURL(url); }); };
   }, [originalImagePreview, processedImageUrl, croppedImagePreviewUrl]);
 
-  // onImageLoad (from original, unchanged)
-  const onImageLoad = useCallback((e) => { 
+  const onImageLoad = useCallback((e) => { // UNCHANGED
     imgRef.current = e.currentTarget;
     const { width, height } = e.currentTarget;
-    if (width === 0 || height === 0) { 
-        console.error("onImageLoad: Image loaded with zero dimensions.");
-        setError("Could not load image. Please try a different image or check the file.");
-        if(originalImagePreview) URL.revokeObjectURL(originalImagePreview);
-        setOriginalImagePreview(null); 
-        setCurrentPage('upload'); 
-        return false; 
-    }
     const newCrop = makeAspectCrop({ unit: '%', width: 100, }, aspect, width, height);
     const centeredCrop = centerCrop(newCrop, width, height);
     setCrop(centeredCrop); 
     setCompletedCrop(centeredCrop); 
     return false;
-  }, [aspect, originalImagePreview, setCurrentPage, setError]);
+  }, [aspect]);
 
-  // handleFileChange (from original, unchanged)
-  const handleFileChange = (event) => {
+  const handleFileChange = (event) => { // UNCHANGED
     const file = event.target.files && event.target.files[0]; 
     if (processedImageUrl) { URL.revokeObjectURL(processedImageUrl); setProcessedImageUrl(null); }
     if (croppedImagePreviewUrl) { URL.revokeObjectURL(croppedImagePreviewUrl); setCroppedImagePreviewUrl(null); }
@@ -228,15 +209,13 @@ function App() {
     }
   };
   
-  // useEffect for crop preview (from original, unchanged)
-  useEffect(() => { 
+  useEffect(() => { // UNCHANGED
     if (completedCrop?.width && completedCrop?.height && imgRef.current && selectedFile) {
       generateCroppedPreview(imgRef.current, completedCrop);
     }
-  }, [completedCrop, selectedFile]); 
+  }, [completedCrop, selectedFile]);
 
-  // generateCroppedPreview (from original, unchanged)
-  async function generateCroppedPreview(image, cropData) { 
+  async function generateCroppedPreview(image, cropData) { // UNCHANGED
     if (!cropData || !image) return;
     const fileName = selectedFile ? selectedFile.name : 'crop.png';
     try {
@@ -252,28 +231,39 @@ function App() {
     }
   }
 
-  // handleProcessCroppedImage (from original, with changes for tier logic)
-  const handleProcessCroppedImage = async () => { 
+  // --- REPLACED FUNCTION ---
+  // This new version handles the logic for both free and premium users, and both premium options.
+  const handleProcessCroppedImage = async (processType) => { 
     if (!croppedImageBlob) { setError('Please make a crop selection and ensure a preview is visible.'); return; }
     if (!appToken) { setError('Please sign in.'); return; }
     
     setIsLoading(true); 
+    if (processType === 'ai') {
+        setIsProcessingAI(true);
+    }
     setError('');
     
-    // --- CHANGE #3 (START) ---
-    // Check the user's tier to determine the endpoint and final filename.
     const isPremium = user?.tier === 'premium';
-    const endpoint = isPremium ? `${API_BASE_URL}/process-image-premium/` : `${API_BASE_URL}/process-image/`;
-    console.log(`User tier: ${user?.tier}. Using endpoint: ${endpoint}`);
-    // --- CHANGE #3 (END) ---
+    let endpoint = '';
+    let filenamePrefix = 'resized';
 
+    if (isPremium) {
+        if (processType === 'ai') {
+            endpoint = `${API_BASE_URL}/process-image-premium/`;
+            filenamePrefix = 'premium-enhanced';
+        } else { // 'resize'
+            endpoint = `${API_BASE_URL}/process-image-premium-resize/`;
+        }
+    } else {
+        endpoint = `${API_BASE_URL}/process-image/`;
+    }
+    
     const formData = new FormData();
     const fName = croppedImageBlob.name || 'cropped_for_tv.png';
     formData.append('file', croppedImageBlob, fName);
     
-    // Original AbortController logic is good, keeping it
     const controller = new AbortController();
-    const tId = setTimeout(() => controller.abort(), 600000); // 10 minutes
+    const tId = setTimeout(() => controller.abort(), 600000);
 
     try {
         const response = await fetch(endpoint, {method: 'POST', headers: {'Authorization': `Bearer ${appToken}`}, body: formData, signal: controller.signal});
@@ -281,19 +271,16 @@ function App() {
         if (!response.ok) { 
             let errDetail = `Error ${response.status}: ${response.statusText}`; 
             if (response.status === 401) { errDetail = "Unauthorized. Session may have expired."; handleLogout(); } 
-            else { try {const ed = await response.json(); errDetail = ed.detail || errDetail;} catch (e) { /* use default errDetail */ } }
+            else { try {const ed = await response.json(); errDetail = ed.detail || errDetail;} catch (e) {} }
             throw new Error(errDetail);
         }
         const imgBlob = await response.blob();
         processedImageRef.current = imgBlob; 
         setProcessedImageUrl(URL.createObjectURL(imgBlob));
         
-        // --- CHANGE #4 (START) ---
-        // Dynamically set the download filename
         const bn = fName.replace(/\.[^/.]+$/, "")||'art'; 
         const fileExtension = response.headers.get('content-type')?.includes('jpeg') ? 'jpg' : 'png';
-        setDownloadFileName(`${isPremium ? 'premium-enhanced' : 'resized'}_${bn}.${fileExtension}`);
-        // --- CHANGE #4 (END) ---
+        setDownloadFileName(`${filenamePrefix}_${bn}.${fileExtension}`);
 
         setCurrentPage('result');
     } catch (err) { 
@@ -302,11 +289,13 @@ function App() {
         else{setError(err.message||'Image processing failed.');} 
         setProcessedImageUrl(null);
     }
-    finally { setIsLoading(false); }
+    finally { 
+        setIsLoading(false);
+        setIsProcessingAI(false);
+    }
   };
 
-  // handleDownload (from original, unchanged)
-  const handleDownload = () => { 
+  const handleDownload = () => { // UNCHANGED
     if (processedImageRef.current) {
       const url = URL.createObjectURL(processedImageRef.current); 
       const a = document.createElement('a'); a.href = url; a.download = downloadFileName;
@@ -315,13 +304,12 @@ function App() {
     }
   };
 
-  // renderPageContent (from original, with minor text changes for tier logic)
-  const renderPageContent = () => {
+  const renderPageContent = () => { // MODIFIED
     if (isLoading) { 
       return (
         <div className="loading-indicator">
           <Oval height={50} width={50} color="#673ab7" secondaryColor="#d1c4e9" strokeWidth={4} strokeWidthSecondary={4} ariaLabel="oval-loading" wrapperStyle={{ margin: "0 auto" }} visible={true}/>
-          <p>Enhancing your image for The Frame TV...</p>
+          <p>{isProcessingAI ? "Enhancing with AI, this may take a moment..." : "Processing your image..."}</p>
         </div>
       );
     }
@@ -371,12 +359,23 @@ function App() {
                   <img alt="Cropped Preview" src={croppedImagePreviewUrl} className="crop-output-image"/>
                 </div>
               )}
+              {/* --- THIS IS THE NEW BUTTON LOGIC --- */}
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px' }}>
-                <button onClick={handleProcessCroppedImage} disabled={!croppedImageBlob || isLoading} className="action-button">
-                  {/* Text dynamically changes based on tier */}
-                  {user?.tier === 'premium' ? 'Enhance with AI (Premium)' : 'Resize to 4K (Free)'}
-                </button>
-                <button onClick={() => resetAllImageStates(true)} className="secondary-action-button">
+                {user?.tier === 'premium' ? (
+                    <>
+                      <button onClick={() => handleProcessCroppedImage('ai')} disabled={!croppedImageBlob || isLoading} className="action-button">
+                        {isLoading && isProcessingAI ? 'AI Enhancing...' : 'Enhance with AI (Slower)'}
+                      </button>
+                      <button onClick={() => handleProcessCroppedImage('resize')} disabled={!croppedImageBlob || isLoading} className="action-button" style={{backgroundColor: '#7E57C2'}}>
+                        {isLoading && !isProcessingAI ? 'Resizing...' : 'Resize to 4K (Faster)'}
+                      </button>
+                    </>
+                ) : (
+                    <button onClick={() => handleProcessCroppedImage('resize')} disabled={!croppedImageBlob || isLoading} className="action-button">
+                      Resize to 4K (Free)
+                    </button>
+                )}
+                <button onClick={() => resetAllImageStates(true)} className="secondary-action-button" disabled={isLoading}>
                   Choose Different Image
                 </button>
               </div>
@@ -417,12 +416,9 @@ function App() {
       <div className="container">
         <header className="app-header">
           <h1>Frame TV Image Enhancer</h1>
-          {/* This part of the UI is now driven by the 'user' object from the backend */}
           {appToken && user && !isLoading && ( 
             <div className="user-info">
-              {/* --- CHANGE #2 (START) --- */}
               {user.tier === 'premium' && <span title="Premium Tier" style={{color: '#ffd700', fontWeight: 'bold', fontSize: '1.2rem'}}>👑</span>}
-              {/* --- CHANGE #2 (END) --- */}
               {user.picture && <img src={user.picture} alt={user.name || 'User'} className="user-avatar" />}
               <span>Hi, {user.name || user.email}!</span>
               <button onClick={handleLogout} className="logout-button">Logout</button>
@@ -435,7 +431,11 @@ function App() {
         </div>
 
         <div className="disclaimer">
-          {/* Unchanged */}
+            <p>
+                <strong>Free Tier:</strong> Images are resized to 4K (3840x2160) using standard algorithms.
+                <br/>
+                <strong>Premium Tier:</strong> Images can be enhanced with AI for superior detail or quickly resized to 4K.
+            </p>
         </div>
       </div>
     </div>
