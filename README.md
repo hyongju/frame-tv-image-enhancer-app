@@ -1,3 +1,6 @@
+
+docker compose exec db psql -U myuser -d image_processor_db
+
 # Frame TV Image Enhancer
 
 Upscale your favorite images to stunning 4K quality, perfectly optimized for display on your Samsung The Frame TV's Art Mode. This application uses advanced AI (Real-ESRGAN) on the backend to enhance your images, with a user-friendly React frontend for uploading, cropping, and downloading your artwork.

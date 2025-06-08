@@ -4,8 +4,7 @@ FROM python:3.11-slim
 USER root
 # Set the working directory in the container
 WORKDIR /code
-RUN apt-get update && apt-get install -y python3-opencv
-
+RUN apt-get update && apt-get install -y python3-opencv postgresql-client
 # Copy the requirements file into the container at /code
 COPY ./requirements.txt /code/requirements.txt
 ENV PYTHONPATH=/code
