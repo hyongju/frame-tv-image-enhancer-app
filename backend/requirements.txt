@@ -4,6 +4,7 @@ Pillow
 python-multipart
 google-auth  # For verifying Google ID tokens
 google-auth-oauthlib
+itsdangerous
 python-jose[cryptography] # For creating our own JWTs
 passlib[bcrypt] # For hashing (if you store users, not strictly needed for OIDC only)
 python-dotenv # To load .env files
@@ -27,3 +28,4 @@ SQLAlchemy
 psycopg2-binary
 
 sqladmin
+python-multipart

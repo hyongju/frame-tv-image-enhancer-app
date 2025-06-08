@@ -432,9 +432,10 @@ function App() {
 
         <div className="disclaimer">
             <p>
-                <strong>Free Tier:</strong> Images are resized to 4K (3840x2160) using standard algorithms.
-                <br/>
-                <strong>Premium Tier:</strong> Images can be enhanced with AI for superior detail or quickly resized to 4K.
+                For the <strong>Free Tier</strong>, your images are quickly resized to a 4K resolution (3840x2160) perfect for your TV. The <strong>Premium Tier</strong> adds an extra step: your image is first processed by the incredible <a href="https://github.com/xinntao/Real-ESRGAN" target="_blank" rel="noopener noreferrer">Real-ESRGAN</a> AI upscaler to create stunning detail before being resized.
+            </p>
+            <p>
+                Full credit for the AI technology goes to the original developers. Please note that the Premium Tier is currently for personal and testing purposes only due to the significant GPU resources required.
             </p>
         </div>
       </div>
