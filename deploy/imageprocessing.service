@@ -1,0 +1,35 @@
+[Unit]
+Description=My Docker Compose Application Service
+Requires=docker.service 
+# Ensures Docker daemon is running first
+After=docker.service network-online.target 
+# Starts after Docker and network are up
+# If your compose uses named volumes managed by Docker, docker.service is enough
+# If it depends on specific mount points being ready (e.g., an NFS share), add them to After= and Requires=.
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes 
+# Important for 'oneshot' if you want 'stop' to work correctly
+#User=your_user      # Optional: Run as a specific user (e.g., the user who owns the project files)
+#Group=your_group    # Optional: Corresponding group for the user
+WorkingDirectory=/home/hyongju/Documents/vscode/frame-tv-image-enhancer-app 
+# IMPORTANT: Set this to your project's root directory
+
+# Command to start the application
+ExecStart=/usr/bin/docker compose up -d --remove-orphans
+
+# Command to stop the application
+ExecStop=/usr/bin/docker compose down
+
+# Optional: Command to restart
+# ExecReload=/usr/local/bin/docker-compose restart
+
+# Optional: Set a timeout for start/stop operations
+TimeoutStartSec=0 
+# 0 means infinite, adjust as needed e.g., 5min
+TimeoutStopSec=2min
+
+[Install]
+WantedBy=multi-user.target 
+# Start when the system reaches multi-user runlevel
