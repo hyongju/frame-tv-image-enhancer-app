@@ -1,6 +1,24 @@
 fastapi
-uvicorn
-pydantic
-# Add the actual package for google.adk here, e.g.:
-# google-adk
-# litellm
+uvicorn[standard]
+Pillow
+python-multipart
+google-auth
+google-auth-oauthlib
+itsdangerous
+python-jose[cryptography]
+passlib[bcrypt]
+python-dotenv
+requests
+basicsr>=1.4.2
+facexlib>=0.2.5
+gfpgan>=1.3.5
+numpy<2
+opencv-python-headless
+torch>=1.7,<2.1
+torchvision==0.15.1
+torchaudio
+tqdm
+SQLAlchemy
+psycopg2-binary
+sqladmin
+pydantic[email]

@@ -16,8 +16,9 @@ services:
 
   backend:
     build: ./backend
-    ports:
-      - "8181:8000"
+    # Port not exposed publicly — only accessible inside Docker network via nginx proxy
+    # ports:
+    #   - "8181:8000"
     volumes:
       - ./backend/app:/code/app:z
       # Note: We'll use the .env file in the root for docker-compose, and the backend
@@ -56,8 +57,8 @@ services:
     build:
       context: ./frontend
       args:
-        VITE_API_URL: https://api.hyongju.com
-        VITE_GOOGLE_CLIENT_ID: ${VITE_GOOGLE_CLIENT_ID_FROM_HOST_ENV}
+        # Relative /api path — nginx in this container proxies it to the backend internally
+        VITE_API_URL: /api
     ports:
       - "3131:80"
     depends_on:

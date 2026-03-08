@@ -27,6 +27,16 @@ from PIL import Image, UnidentifiedImageError
 from math import sqrt
 from typing import Optional
 
+# Compatibility patch: basicsr references torchvision.transforms.functional_tensor
+# which was removed in torchvision >= 0.16. Map it to the current location.
+import sys
+from types import ModuleType as _ModuleType
+import torchvision.transforms.functional as _tvf
+_ft = _ModuleType('torchvision.transforms.functional_tensor')
+_ft.rgb_to_grayscale = _tvf.rgb_to_grayscale
+sys.modules['torchvision.transforms.functional_tensor'] = _ft
+del _ft, _tvf, _ModuleType
+
 # --- Local Imports (Simulated for single file structure) ---
 from basicsr.archs.rrdbnet_arch import RRDBNet
 from realesrgan.utils import RealESRGANer
@@ -183,7 +193,14 @@ Base.metadata.create_all(bind=engine)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://localhost:5173", "http://localhost:3131", "https://image.hyongju.com", "http://localhost"],
+    # In production all traffic is same-origin (nginx proxy).
+    # These origins are only needed for local development.
+    allow_origins=[
+        "http://localhost:3000",
+        "http://localhost:5173",
+        "http://localhost:3131",
+        "http://localhost",
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

@@ -36,9 +36,8 @@ RUN rm -rf /usr/share/nginx/html/*
 # Copy static assets from builder stage (Vite builds to 'dist' folder)
 COPY --from=builder /app/dist /usr/share/nginx/html
 
-# Optional: Copy custom Nginx configuration for SPA routing
-# If you have frontend/nginx.conf (same as provided before), uncomment this.
-# COPY nginx.conf /etc/nginx/conf.d/default.conf
+# Custom Nginx config: serves SPA and proxies /api/* to backend
+COPY nginx.conf /etc/nginx/conf.d/default.conf
 
 # Expose port 80 (Nginx default)
 EXPOSE 80

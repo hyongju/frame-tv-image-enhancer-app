@@ -16,8 +16,8 @@ RemainAfterExit=yes
 WorkingDirectory=/home/hyongju/Documents/vscode/frame-tv-image-enhancer-app 
 # IMPORTANT: Set this to your project's root directory
 
-# Command to start the application
-ExecStart=/usr/bin/docker compose up -d --remove-orphans
+# Command to start the application (--build rebuilds images if Dockerfile/code changed)
+ExecStart=/usr/bin/docker compose up -d --build --remove-orphans
 
 # Command to stop the application
 ExecStop=/usr/bin/docker compose down
