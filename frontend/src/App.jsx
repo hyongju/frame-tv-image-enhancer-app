@@ -4,9 +4,9 @@ import jwt_decode from 'jwt-decode';
 import { Oval } from 'react-loader-spinner';
 import ReactCrop, { centerCrop, makeAspectCrop } from 'react-image-crop';
 import heic2any from 'heic2any';
-import './App.css'; // Ensure ReactCrop.css is imported here or in main.jsx via App.css
+import './App.css';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8181'; // Or your production URL
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8181';
 
 // Helper function to get cropped image data (FROM YOUR ORIGINAL, UNCHANGED)
 function getCroppedImg(image, crop, fileName) {
@@ -63,6 +63,224 @@ function getCroppedImg(image, crop, fileName) {
   });
 }
 
+// ============================================================
+// Sub-Components
+// ============================================================
+
+function LoadingIndicator({ isProcessingAI }) {
+  return (
+    <div className="loading-indicator">
+      <Oval
+        height={50}
+        width={50}
+        color="#a855f7"
+        secondaryColor="#4c1d95"
+        strokeWidth={4}
+        strokeWidthSecondary={4}
+        ariaLabel="oval-loading"
+        wrapperStyle={{ margin: '0 auto' }}
+        visible={true}
+      />
+      <p>{isProcessingAI ? 'Enhancing with AI, this may take a moment...' : 'Processing your image...'}</p>
+    </div>
+  );
+}
+
+function AuthSection({ error, onLoginSuccess, onLoginError }) {
+  return (
+    <>
+      <p className="auth-intro-text">
+        Sign in to upscale your favorite images for your Samsung The Frame TV.
+      </p>
+      {error && <p className="error" style={{ marginBottom: '15px' }}>Error: {error}</p>}
+      <GoogleLogin
+        onSuccess={onLoginSuccess}
+        onError={onLoginError}
+        theme="filled_black"
+        size="large"
+        shape="rectangular"
+      />
+    </>
+  );
+}
+
+function ErrorView({ error, onReset }) {
+  return (
+    <div>
+      <p className="error">Error: {error}</p>
+      <button
+        onClick={onReset}
+        className="action-button"
+        style={{ marginTop: '10px' }}
+      >
+        Start Over
+      </button>
+    </div>
+  );
+}
+
+function UploadStep({ fileInputRef, onFileChange }) {
+  return (
+    <div className="upload-section">
+      <h2>Step 1: Upload Your Image</h2>
+      <p>Choose any image you'd like to prepare for your Samsung Frame TV's Art Mode.</p>
+      <input
+        type="file"
+        accept="image/*,.heic,.heif,image/heic,image/heif"
+        onChange={onFileChange}
+        ref={fileInputRef}
+      />
+      <div className="supported-formats">
+        <span className="supported-formats-label">Supported formats:</span>
+        {['JPEG', 'PNG', 'WEBP', 'HEIC', 'HEIF', 'GIF', 'BMP', 'TIFF'].map(fmt => (
+          <span key={fmt} className="format-tag">{fmt}</span>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function CropStep({
+  originalImagePreview, crop, setCrop, setCompletedCrop,
+  imgRef, onImageLoad, aspect, croppedImagePreviewUrl,
+  croppedImageBlob, isLoading, isProcessingAI, onProcess,
+  onReset, user,
+}) {
+  if (!originalImagePreview) {
+    return (
+      <p>
+        Please{' '}
+        <button onClick={onReset} className="link-button">upload an image</button>
+        {' '}first.
+      </p>
+    );
+  }
+  return (
+    <div className="crop-area-container">
+      <h2>Step 2: Crop for 16:9 Aspect</h2>
+      <p>Drag to select the perfect 16:9 portion of your image.</p>
+      <ReactCrop
+        crop={crop}
+        onChange={(_, pc) => setCrop(pc)}
+        onComplete={(c) => setCompletedCrop(c)}
+        aspect={aspect}
+        minWidth={50}
+        minHeight={Math.round(50 / aspect)}
+      >
+        <img
+          ref={imgRef}
+          alt="Crop area"
+          src={originalImagePreview}
+          onLoad={onImageLoad}
+          style={{ maxHeight: '350px', maxWidth: '100%', display: 'block', margin: '0 auto', objectFit: 'contain' }}
+        />
+      </ReactCrop>
+      <div className="crop-actions-container">
+        {croppedImagePreviewUrl && (
+          <div className="crop-output-preview-container">
+            <h4>Cropped Preview:</h4>
+            <img alt="Cropped Preview" src={croppedImagePreviewUrl} className="crop-output-image" />
+          </div>
+        )}
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px' }}>
+          {user?.tier === 'premium' ? (
+            <>
+              <button
+                onClick={() => onProcess('ai')}
+                disabled={!croppedImageBlob || isLoading}
+                className="action-button"
+              >
+                {isLoading && isProcessingAI ? 'AI Enhancing...' : 'Enhance with AI (Slower)'}
+              </button>
+              <button
+                onClick={() => onProcess('resize')}
+                disabled={!croppedImageBlob || isLoading}
+                className="action-button"
+                style={{ background: 'linear-gradient(135deg, #4c1d95, #6d28d9)' }}
+              >
+                {isLoading && !isProcessingAI ? 'Resizing...' : 'Resize to 4K (Faster)'}
+              </button>
+            </>
+          ) : (
+            <button
+              onClick={() => onProcess('resize')}
+              disabled={!croppedImageBlob || isLoading}
+              className="action-button"
+            >
+              Resize to 4K (Free)
+            </button>
+          )}
+          <button
+            onClick={onReset}
+            className="secondary-action-button"
+            disabled={isLoading}
+          >
+            Choose Different Image
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function ResultStep({ processedImageUrl, downloadFileName, onDownload, onReset }) {
+  if (!processedImageUrl) {
+    return (
+      <p>
+        Processing may have failed or no image is ready. Please{' '}
+        <button onClick={onReset} className="link-button">start over</button>.
+      </p>
+    );
+  }
+  return (
+    <>
+      <div className="image-preview-container" style={{ marginTop: '10px' }}>
+        <div className="image-box">
+          <h2>Step 3: Your Frame TV Art!</h2>
+          <img src={processedImageUrl} alt="Upscaled for Samsung Frame TV" />
+        </div>
+      </div>
+      <div className="result-section">
+        <p>
+          Save your upscaled image.<br />
+          Filename: <strong>{downloadFileName}</strong>
+        </p>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px' }}>
+          <button onClick={onDownload} className="download-button">
+            Download Enhanced Image
+          </button>
+          <button onClick={onReset} className="secondary-action-button">
+            Enhance Another Image
+          </button>
+        </div>
+      </div>
+    </>
+  );
+}
+
+function AppHeader({ appToken, user, isLoading, onLogout }) {
+  return (
+    <header className="app-header">
+      <h1>Frame TV Image Enhancer</h1>
+      {appToken && user && !isLoading && (
+        <div className="user-info">
+          {user.tier === 'premium' && (
+            <span title="Premium Tier" style={{ color: '#ffd700', fontWeight: 'bold', fontSize: '1.2rem' }}>👑</span>
+          )}
+          {user.picture && (
+            <img src={user.picture} alt={user.name || 'User'} className="user-avatar" />
+          )}
+          <span>Hi, {user.name || user.email}!</span>
+          <button onClick={onLogout} className="logout-button">Logout</button>
+        </div>
+      )}
+    </header>
+  );
+}
+
+// ============================================================
+// Main App Component
+// ============================================================
 
 function App() {
   // --- All State from your original file ---
@@ -326,145 +544,84 @@ function App() {
     }
   };
 
-  const renderPageContent = () => { // MODIFIED
-    if (isLoading) { 
+  const renderPageContent = () => {
+    if (isLoading) {
+      return <LoadingIndicator isProcessingAI={isProcessingAI} />;
+    }
+
+    if (!appToken) {
       return (
-        <div className="loading-indicator">
-          <Oval height={50} width={50} color="#673ab7" secondaryColor="#d1c4e9" strokeWidth={4} strokeWidthSecondary={4} ariaLabel="oval-loading" wrapperStyle={{ margin: "0 auto" }} visible={true}/>
-          <p>{isProcessingAI ? "Enhancing with AI, this may take a moment..." : "Processing your image..."}</p>
-        </div>
+        <AuthSection
+          error={error}
+          onLoginSuccess={handleGoogleLoginSuccess}
+          onLoginError={handleGoogleLoginError}
+        />
       );
     }
 
-    if (!appToken) { 
-      return ( 
-        <>
-          <p className="auth-intro-text">
-            Sign in to upscale your favorite images for your Samsung The Frame TV.
-          </p>
-          {error && <p className="error" style={{marginBottom: '15px'}}>Error: {error}</p>}
-          <GoogleLogin onSuccess={handleGoogleLoginSuccess} onError={handleGoogleLoginError} theme="outline" size="large" shape="rectangular"/>
-        </>
-      );
-    }
-    
-    if (error) { 
-        return (
-            <div>
-                <p className="error">Error: {error}</p>
-                <button onClick={() => resetAllImageStates(true) } className="action-button" style={{marginTop: "10px", backgroundColor: "#9575cd"}}>Start Over</button>
-            </div>
-        );
+    if (error) {
+      return <ErrorView error={error} onReset={() => resetAllImageStates(true)} />;
     }
 
     switch (currentPage) {
       case 'upload':
-        return (
-          <div className="upload-section">
-            <h2>Step 1: Upload Your Image</h2>
-            <p>Choose any image you'd like to prepare for your Samsung Frame TV's Art Mode.</p>
-            <input type="file" accept="image/*,.heic,.heif,image/heic,image/heif" onChange={handleFileChange} ref={fileInputRef}/>
-            <div className="supported-formats">
-              <span className="supported-formats-label">Supported formats:</span>
-              {['JPEG', 'PNG', 'WEBP', 'HEIC', 'HEIF', 'GIF', 'BMP', 'TIFF'].map(fmt => (
-                <span key={fmt} className="format-tag">{fmt}</span>
-              ))}
-            </div>
-          </div>
-        );
+        return <UploadStep fileInputRef={fileInputRef} onFileChange={handleFileChange} />;
       case 'crop':
-        return originalImagePreview ? (
-          <div className="crop-area-container">
-            <h2>Step 2: Crop for 16:9 Aspect</h2>
-            <p>Drag to select the perfect 16:9 portion of your image.</p> 
-            <ReactCrop crop={crop} onChange={(_, pc) => setCrop(pc)} onComplete={(c) => setCompletedCrop(c)} aspect={aspect} minWidth={50} minHeight={Math.round(50/aspect)}>
-              <img ref={imgRef} alt="Crop area" src={originalImagePreview} onLoad={onImageLoad} style={{maxHeight: '350px', maxWidth: '100%', display: 'block', margin: '0 auto', objectFit: 'contain'}}/>
-            </ReactCrop>
-            <div className="crop-actions-container">
-              {croppedImagePreviewUrl && (
-                <div className="crop-output-preview-container">
-                  <h4>Cropped Preview:</h4>
-                  <img alt="Cropped Preview" src={croppedImagePreviewUrl} className="crop-output-image"/>
-                </div>
-              )}
-              {/* --- THIS IS THE NEW BUTTON LOGIC --- */}
-              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px' }}>
-                {user?.tier === 'premium' ? (
-                    <>
-                      <button onClick={() => handleProcessCroppedImage('ai')} disabled={!croppedImageBlob || isLoading} className="action-button">
-                        {isLoading && isProcessingAI ? 'AI Enhancing...' : 'Enhance with AI (Slower)'}
-                      </button>
-                      <button onClick={() => handleProcessCroppedImage('resize')} disabled={!croppedImageBlob || isLoading} className="action-button" style={{backgroundColor: '#7E57C2'}}>
-                        {isLoading && !isProcessingAI ? 'Resizing...' : 'Resize to 4K (Faster)'}
-                      </button>
-                    </>
-                ) : (
-                    <button onClick={() => handleProcessCroppedImage('resize')} disabled={!croppedImageBlob || isLoading} className="action-button">
-                      Resize to 4K (Free)
-                    </button>
-                )}
-                <button onClick={() => resetAllImageStates(true)} className="secondary-action-button" disabled={isLoading}>
-                  Choose Different Image
-                </button>
-              </div>
-            </div>
-          </div>
-        ) : (
-          <p>Please <button onClick={() => resetAllImageStates(true)} className="link-button">upload an image</button> first.</p>
+        return (
+          <CropStep
+            originalImagePreview={originalImagePreview}
+            crop={crop}
+            setCrop={setCrop}
+            setCompletedCrop={setCompletedCrop}
+            imgRef={imgRef}
+            onImageLoad={onImageLoad}
+            aspect={aspect}
+            croppedImagePreviewUrl={croppedImagePreviewUrl}
+            croppedImageBlob={croppedImageBlob}
+            isLoading={isLoading}
+            isProcessingAI={isProcessingAI}
+            onProcess={handleProcessCroppedImage}
+            onReset={() => resetAllImageStates(true)}
+            user={user}
+          />
         );
       case 'result':
-        return processedImageUrl ? (
-          <>
-            <div className="image-preview-container" style={{marginTop: '10px'}}>
-              <div className="image-box">
-                <h2>Step 3: Your Frame TV Art!</h2>
-                <img src={processedImageUrl} alt="Upscaled for Samsung Frame TV"/>
-              </div>
-            </div>
-            <div className="result-section">
-              <p>Save your upscaled image. <br/>Filename: <strong>{downloadFileName}</strong></p> 
-              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px' }}>
-                <button onClick={handleDownload} className="download-button">Download Enhanced Image</button>
-                <button onClick={() => resetAllImageStates(true)} className="secondary-action-button">
-                  Enhance Another Image
-                </button>
-              </div>
-            </div>
-          </>
-        ) : (
-            <p>Processing may have failed or no image is ready. Please <button onClick={() => resetAllImageStates(true)} className="link-button">start over</button>.</p>
+        return (
+          <ResultStep
+            processedImageUrl={processedImageUrl}
+            downloadFileName={downloadFileName}
+            onDownload={handleDownload}
+            onReset={() => resetAllImageStates(true)}
+          />
         );
       default:
-        return <p>Something went wrong. Please <button onClick={() => resetAllImageStates(true)} className="link-button">start over</button>.</p>;
+        return <ErrorView error="Something went wrong." onReset={() => resetAllImageStates(true)} />;
     }
   };
 
   return (
     <div className="App">
       <div className="container">
-        <header className="app-header">
-          <h1>Frame TV Image Enhancer</h1>
-          {appToken && user && !isLoading && ( 
-            <div className="user-info">
-              {user.tier === 'premium' && <span title="Premium Tier" style={{color: '#ffd700', fontWeight: 'bold', fontSize: '1.2rem'}}>👑</span>}
-              {user.picture && <img src={user.picture} alt={user.name || 'User'} className="user-avatar" />}
-              <span>Hi, {user.name || user.email}!</span>
-              <button onClick={handleLogout} className="logout-button">Logout</button>
-            </div>
-          )}
-        </header>
-        
-        <div className={!appToken && !isLoading ? "auth-section" : "main-content-area"}>
+        <AppHeader
+          appToken={appToken}
+          user={user}
+          isLoading={isLoading}
+          onLogout={handleLogout}
+        />
+
+        <div className={!appToken && !isLoading ? 'auth-section' : 'main-content-area'}>
           {renderPageContent()}
         </div>
 
         <div className="disclaimer">
-            <p>
-                For the <strong>Free Tier</strong>, your images are quickly resized to a 4K resolution (3840x2160) perfect for your TV. The <strong>Premium Tier</strong> adds an extra step: your image is first processed by the incredible <a href="https://github.com/xinntao/Real-ESRGAN" target="_blank" rel="noopener noreferrer">Real-ESRGAN</a> AI upscaler to create stunning detail before being resized.
-            </p>
-            <p>
-                Full credit for the AI technology goes to the original developers. Please note that the Premium Tier is currently for personal and testing purposes only due to the significant GPU resources required.
-            </p>
+          <p>
+            For the <strong>Free Tier</strong>, your images are quickly resized to a 4K resolution (3840x2160) perfect for your TV. The <strong>Premium Tier</strong> adds an extra step: your image is first processed by the incredible{' '}
+            <a href="https://github.com/xinntao/Real-ESRGAN" target="_blank" rel="noopener noreferrer">Real-ESRGAN</a>{' '}
+            AI upscaler to create stunning detail before being resized.
+          </p>
+          <p>
+            Full credit for the AI technology goes to the original developers. Please note that the Premium Tier is currently for personal and testing purposes only due to the significant GPU resources required.
+          </p>
         </div>
       </div>
     </div>
