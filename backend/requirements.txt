@@ -1,6 +1,7 @@
 fastapi
 uvicorn[standard]
 Pillow
+pillow-heif
 python-multipart
 google-auth
 google-auth-oauthlib

@@ -21,9 +21,12 @@ import asyncio
 import torch
 import gc
 import enum
+import math
 from functools import partial
 from concurrent.futures import ThreadPoolExecutor
 from PIL import Image, UnidentifiedImageError
+import pillow_heif
+pillow_heif.register_heif_opener()
 from math import sqrt
 from typing import Optional
 
@@ -208,7 +211,7 @@ app.add_middleware(
 
 # --- Global Config & State ---
 NETSCALE = 3
-ENHANCE_TIMEOUT_SECONDS = 120
+ENHANCE_TIMEOUT_SECONDS = 600
 MAX_FILE_SIZE_MB = 50
 MAX_FILE_SIZE_BYTES = MAX_FILE_SIZE_MB * 1024 * 1024
 TARGET_FINAL_WIDTH = 3840
@@ -259,6 +262,20 @@ def resize_and_crop_to_fill(image: Image.Image, target_w: int, target_h: int) ->
     top = (interim_h - target_h) / 2
     cropped_image = resized_image.crop((left, top, left + target_w, top + target_h))
     return cropped_image
+
+def downscale_for_esrgan(image: Image.Image, target_w: int, target_h: int, netscale: int, margin: float = 1.15) -> Image.Image:
+    """Downscale image to the minimum size that, after netscale upsampling, still covers the target.
+    This dramatically reduces tile count without degrading the final output quality."""
+    max_input_w = int(math.ceil(target_w / netscale * margin))
+    max_input_h = int(math.ceil(target_h / netscale * margin))
+    img_w, img_h = image.size
+    if img_w <= max_input_w and img_h <= max_input_h:
+        return image
+    scale = min(max_input_w / img_w, max_input_h / img_h)
+    new_w = max(1, int(round(img_w * scale)))
+    new_h = max(1, int(round(img_h * scale)))
+    logger.info(f"Pre-resizing for ESRGAN: {img_w}x{img_h} → {new_w}x{new_h} (saves ~{int((img_w*img_h)/(new_w*new_h))}x tile work)")
+    return image.resize((new_w, new_h), Image.Resampling.LANCZOS)
 
 def synchronous_enhancement_function(image_cv_data, current_upsampler, output_scale_factor):
     if current_upsampler is None:
@@ -325,7 +342,8 @@ async def process_image_premium(file: UploadFile = File(...), premium_user: User
     
     try:
         pil_image = Image.open(io.BytesIO(contents))
-        img_cv = cv2.cvtColor(np.array(pil_image.convert('RGB')), cv2.COLOR_RGB2BGR)
+        pil_image = downscale_for_esrgan(pil_image.convert('RGB'), TARGET_FINAL_WIDTH, TARGET_FINAL_HEIGHT, NETSCALE)
+        img_cv = cv2.cvtColor(np.array(pil_image), cv2.COLOR_RGB2BGR)
         loop = asyncio.get_event_loop()
         enhance_task = partial(synchronous_enhancement_function, img_cv, upsampler, NETSCALE)
         processed_cv = await asyncio.wait_for(

@@ -3,6 +3,7 @@ import { GoogleLogin, googleLogout } from '@react-oauth/google';
 import jwt_decode from 'jwt-decode';
 import { Oval } from 'react-loader-spinner';
 import ReactCrop, { centerCrop, makeAspectCrop } from 'react-image-crop';
+import heic2any from 'heic2any';
 import './App.css'; // Ensure ReactCrop.css is imported here or in main.jsx via App.css
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8181'; // Or your production URL
@@ -189,7 +190,7 @@ function App() {
     return false;
   }, [aspect]);
 
-  const handleFileChange = (event) => { // UNCHANGED
+  const handleFileChange = async (event) => {
     const file = event.target.files && event.target.files[0]; 
     if (processedImageUrl) { URL.revokeObjectURL(processedImageUrl); setProcessedImageUrl(null); }
     if (croppedImagePreviewUrl) { URL.revokeObjectURL(croppedImagePreviewUrl); setCroppedImagePreviewUrl(null); }
@@ -200,9 +201,30 @@ function App() {
     setCompletedCrop(null);
     setError(''); 
     if (file) {
-      setSelectedFile(file); 
-      setOriginalImagePreview(URL.createObjectURL(file));
-      setCurrentPage('crop');
+      const isHeic = file.type === 'image/heic' || file.type === 'image/heif' ||
+        /\.(heic|heif)$/i.test(file.name);
+      if (isHeic) {
+        setIsLoading(true);
+        try {
+          const convertedBlob = await heic2any({ blob: file, toType: 'image/jpeg', quality: 0.92 });
+          const jpegBlob = Array.isArray(convertedBlob) ? convertedBlob[0] : convertedBlob;
+          const jpegFile = new File([jpegBlob], file.name.replace(/\.(heic|heif)$/i, '.jpg'), { type: 'image/jpeg' });
+          setSelectedFile(jpegFile);
+          setOriginalImagePreview(URL.createObjectURL(jpegFile));
+          setCurrentPage('crop');
+        } catch (e) {
+          console.error('HEIC conversion failed:', e);
+          setError('Failed to convert HEIC image. Please try a JPEG or PNG file.');
+          setSelectedFile(null);
+          setCurrentPage('upload');
+        } finally {
+          setIsLoading(false);
+        }
+      } else {
+        setSelectedFile(file); 
+        setOriginalImagePreview(URL.createObjectURL(file));
+        setCurrentPage('crop');
+      }
     } else {
       setSelectedFile(null); 
       setCurrentPage('upload'); 
@@ -341,7 +363,13 @@ function App() {
           <div className="upload-section">
             <h2>Step 1: Upload Your Image</h2>
             <p>Choose any image you'd like to prepare for your Samsung Frame TV's Art Mode.</p>
-            <input type="file" accept="image/*" onChange={handleFileChange} ref={fileInputRef}/>
+            <input type="file" accept="image/*,.heic,.heif,image/heic,image/heif" onChange={handleFileChange} ref={fileInputRef}/>
+            <div className="supported-formats">
+              <span className="supported-formats-label">Supported formats:</span>
+              {['JPEG', 'PNG', 'WEBP', 'HEIC', 'HEIF', 'GIF', 'BMP', 'TIFF'].map(fmt => (
+                <span key={fmt} className="format-tag">{fmt}</span>
+              ))}
+            </div>
           </div>
         );
       case 'crop':

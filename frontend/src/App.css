@@ -165,6 +165,32 @@ h4 {
 }
 
 
+/* Supported Formats */
+.supported-formats {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin-top: 14px;
+  justify-content: center;
+}
+.supported-formats-label {
+  font-size: 0.78em;
+  color: #7e57a0;
+  font-weight: 500;
+  margin-right: 2px;
+}
+.format-tag {
+  font-size: 0.72em;
+  font-weight: 600;
+  color: #6a3d9a;
+  background: rgba(106, 61, 154, 0.1);
+  border: 1px solid rgba(106, 61, 154, 0.25);
+  border-radius: 4px;
+  padding: 2px 7px;
+  letter-spacing: 0.04em;
+}
+
 /* File Input Styling */
 input[type="file"] {
   display: block;
